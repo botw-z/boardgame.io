@@ -1,0 +1,30 @@
+.top-section{
+    display: flex;
+    justify-content: center;
+}
+h3, p{
+    margin: auto;
+}
+label,h1,h2,h3,p{
+  color: white;
+}
+.middle-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh; /* make the container take up the full viewport height */
+  }
+button {
+    margin: 0 10px; /* add some space between the buttons */
+    padding: 10px 20px; /* set the padding for each button */
+    border: none; /* remove the default border */
+    background-color: #070d29; /* set the background color for each button */
+    color: #12e1b9; /* set the text color for each button */
+    border: solid, #12e1b9;
+    cursor: pointer; /* make the buttons clickable */
+  }
+
+  body{
+    background-color: #070d29
+  }
+  
