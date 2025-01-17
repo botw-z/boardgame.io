@@ -35,6 +35,7 @@ let selectedPlayer = null;
 
 async function loadGameData() {
     try {
+        //dateset
         const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS_UfHOtMDSXFBISoWiUahDbKxKHKFd9aiWQFQDEEuXHfjGze17jFt-DtRigL9UGX-ap29XzHAggKRg/pub?gid=0&single=true&output=csv');
 
         const csvText = await response.text();
