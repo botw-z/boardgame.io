@@ -1,6 +1,7 @@
-const closeB = document.getElementsByClassName('close_button');
 const bank = document.getElementById('bank');
-const pop = document.getElementsByClassName('pop_overlay');
+const popup = document.querySelector('.pop_overlay');
+const popup_balance = document.getElementById('popup_balance');
+
 
 class player
 {
@@ -30,14 +31,16 @@ function load()
 {
     document.getElementById("name1").innerHTML = player1.name;
     document.getElementById("job1").innerHTML = player1.job;
-    document.getElementById("total1").innerHTML ="$" +  player1.total;
+    document.getElementById("total1").innerHTML = "$" + player1.total;
     document.getElementById("product1").innerHTML = player1.product;
 }
 
-closeB.addEventListener("click", function(){
-    pop.classList.add('hidden')
-});
-function bankc (){
-    pop.classList.remove('hidden');
+function bankc() {
+    popup.classList.remove('hidden');
+    popup_balance.innerHTML = player1.total;
+}
+
+function closePopup() {
+    popup.classList.add('hidden');
 }
 //give hidden class to all element, how much number input, for loop and remove the hidden element

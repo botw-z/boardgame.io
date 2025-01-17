@@ -54,7 +54,7 @@
     <!-- Buttons -->
     <div class="buttons">
       <button class="button">PROPERTY</button>
-      <button class="button" id = "bank" onclick="bankc()">BANK</button>
+      <button class="button" id="bank" onclick="bankc()">BANK</button>
       <button class="button">STOCK</button>
       <button class="button">LOANS</button>
     </div>
@@ -65,11 +65,19 @@
       <p>DEBUFF: <strong></strong></p>
     </div>
   </div>
-  <div class="hidden" class="pop_overlay">
+
+  <!-- Popup Overlay -->
+  <div class="pop_overlay hidden">
     <div class="pop_container">
-      <p>Hi</p>
+      <h2>Banking Options</h2>
+      <p>Current Balance: $<span id="popup_balance"></span></p>
+      <div class="banking_options">
+        <button class="button">Deposit</button>
+        <button class="button">Withdraw</button>
+        <button class="button">Transfer</button>
+      </div>
       <div class="close_button">
-        <button> x </button>
+        <button onclick="closePopup()">×</button>
       </div>
     </div>
   </div>
