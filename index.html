@@ -3,132 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wealth Warrior</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background-color: #0d0e18;
-      color: #ffffff;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2rem;
-      font-weight: 700;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 40px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-    }
-
-    .logo img {
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-    }
-
-    .age {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-
-    .player-stats {
-      display: flex;
-      justify-content: space-between;
-      text-align: left;
-      margin-bottom: 40px;
-    }
-
-    .player-stats .column {
-      flex: 1;
-      padding: 0 10px;
-    }
-
-    .player-stats .column h3 {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-      text-decoration: underline;
-    }
-
-    .player-stats .column p {
-      font-size: 1rem;
-      line-height: 1.8;
-    }
-
-    .event-search {
-      margin-bottom: 40px;
-    }
-
-    .event-search h2 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-    }
-
-    .event-search input {
-      width: 50%;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: #00ffc3;
-      color: #000;
-      font-size: 1rem;
-    }
-
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-
-    .buttons .button {
-      padding: 15px 40px;
-      border: 2px solid #00ffc3;
-      background: none;
-      color: #00ffc3;
-      font-size: 1rem;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: 0.3s;
-    }
-
-    .buttons .button:hover {
-      background-color: #00ffc3;
-      color: #0d0e18;
-    }
-
-    .status {
-      text-align: left;
-      font-size: 1rem;
-    }
-
-    .status strong {
-      color: #00ffc3;
-    }
-  </style>
+  <title>Market Maverick</title>
+  <link href="./style.css" rel="stylesheet" type="text/css">
 </head>
-<body>
+<body onload="load()">
   <div class="container">
     <!-- Header -->
     <div class="header">
       <div class="logo">
-        <img src="https://via.placeholder.com/60x60" alt="Logo">
-        <h1>WEALTH WARRIOR</h1>
+        <img src="./cropped_image.png" alt="Logo">
+        <h1>Market Maverick</h1>
       </div>
       <div class="age">AGE: 30</div>
     </div>
@@ -137,25 +21,25 @@
     <div class="player-stats">
       <div class="column">
         <h3>NAME</h3>
-        <p>SUNNY</p>
+        <p id="name1">SUNNY</p>
         <p>ETHAN</p>
         <p>ADAM</p>
       </div>
       <div class="column">
         <h3>CAREER</h3>
-        <p>ENGINEER</p>
+        <p id="job1">ENGINEER</p>
         <p>WORKER</p>
         <p>POLICE</p>
       </div>
       <div class="column">
         <h3>MONEY</h3>
-        <p>$10000</p>
+        <p id="total1">$10000</p>
         <p>$100</p>
         <p>$2000</p>
       </div>
       <div class="column">
         <h3>PROPERTY</h3>
-        <p>HOUSE</p>
+        <p id="product1">HOUSE</p>
         <p>NONE</p>
         <p>CAR</p>
       </div>
@@ -170,13 +54,7 @@
     <!-- Buttons -->
     <div class="buttons">
       <button class="button">PROPERTY</button>
-      <button class="button">BANK</button>
-      <button class="button">STOCK</button>
-      <button class="button">LOANS</button>
-    </div>
-    <div class="buttons">
-      <button class="button">PROPERTY</button>
-      <button class="button">BANK</button>
+      <button class="button" id = "bank" onclick="bankc()">BANK</button>
       <button class="button">STOCK</button>
       <button class="button">LOANS</button>
     </div>
@@ -187,5 +65,14 @@
       <p>DEBUFF: <strong></strong></p>
     </div>
   </div>
+  <div class="hidden" class="pop_overlay">
+    <div class="pop_container">
+      <p>Hi</p>
+      <div class="close_button">
+        <button> x </button>
+      </div>
+    </div>
+  </div>
+  <script src="./script.js"></script>
 </body>
 </html>
