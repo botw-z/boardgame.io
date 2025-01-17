@@ -19,29 +19,43 @@
 
     <!-- Player Stats -->
     <div class="player-stats">
-      <div class="column">
-        <h3>NAME</h3>
-        <p id="name1">SUNNY</p>
-        <p>ETHAN</p>
-        <p>ADAM</p>
+      <div class="player-header">
+        <div class="column">
+          <h3>NAME</h3>
+        </div>
+        <div class="column">
+          <h3>CAREER</h3>
+        </div>
+        <div class="column">
+          <h3>MONEY</h3>
+        </div>
+        <div class="column">
+          <h3>PROPERTY</h3>
+        </div>
       </div>
-      <div class="column">
-        <h3>CAREER</h3>
-        <p id="job1">ENGINEER</p>
-        <p>WORKER</p>
-        <p>POLICE</p>
+      
+      <!-- Player Rows -->
+      <div class="player-rows">
+        <!-- Player row template (repeated 15 times) -->
+        <div class="player-row hidden">
+          <div class="column name"></div>
+          <div class="column career"></div>
+          <div class="column money"></div>
+          <div class="column property"></div>
+        </div>
+        <!-- Repeat 14 more times -->
       </div>
-      <div class="column">
-        <h3>MONEY</h3>
-        <p id="total1">$10000</p>
-        <p>$100</p>
-        <p>$2000</p>
-      </div>
-      <div class="column">
-        <h3>PROPERTY</h3>
-        <p id="product1">HOUSE</p>
-        <p>NONE</p>
-        <p>CAR</p>
+    </div>
+
+    <!-- Player Count Overlay -->
+    <div class="pop_overlay" id="player_count_overlay">
+      <div class="pop_container">
+        <h2>Welcome to Market Maverick</h2>
+        <div class="player-count-input">
+          <label for="player_count_input">How many players? (2-15)</label>
+          <input type="number" id="player_count_input" min="2" max="15" value="2">
+        </div>
+        <button class="button" onclick="startGame()">Start Game</button>
       </div>
     </div>
 
@@ -49,14 +63,24 @@
     <div class="event-search">
       <h2>EVENT SEARCH</h2>
       <input type="text" placeholder="Search">
+      <div class="player-selector">
+        <label for="player-select">Select Player:</label>
+        <select id="player-select" onchange="updateSelectedPlayer()">
+          <option value="1">Player 1</option>
+          <option value="2">Player 2</option>
+          <option value="3">Player 3</option>
+          <option value="4">Player 4</option>
+          <option value="5">Player 5</option>
+        </select>
+      </div>
     </div>
 
     <!-- Buttons -->
     <div class="buttons">
-      <button class="button">PROPERTY</button>
+      <button class="button" onclick="propertyc()">PROPERTY</button>
       <button class="button" id="bank" onclick="bankc()">BANK</button>
-      <button class="button">STOCK</button>
-      <button class="button">LOANS</button>
+      <button class="button" onclick="stockc()">STOCK</button>
+      <button class="button" onclick="loansc()">LOANS</button>
     </div>
 
     <!-- Status -->
@@ -66,8 +90,24 @@
     </div>
   </div>
 
-  <!-- Popup Overlay -->
-  <div class="pop_overlay hidden">
+  <!-- Property Popup -->
+  <div class="pop_overlay hidden" id="property_popup">
+    <div class="pop_container">
+      <h2>Property Options</h2>
+      <p>Current Property: <span id="popup_property"></span></p>
+      <div class="property_options">
+        <button class="button">Buy</button>
+        <button class="button">Sell</button>
+        <button class="button">Rent</button>
+      </div>
+      <div class="close_button">
+        <button onclick="closePopup('property_popup')">×</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bank Popup -->
+  <div class="pop_overlay hidden" id="bank_popup">
     <div class="pop_container">
       <h2>Banking Options</h2>
       <p>Current Balance: $<span id="popup_balance"></span></p>
@@ -77,7 +117,39 @@
         <button class="button">Transfer</button>
       </div>
       <div class="close_button">
-        <button onclick="closePopup()">×</button>
+        <button onclick="closePopup('bank_popup')">×</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Popup -->
+  <div class="pop_overlay hidden" id="stock_popup">
+    <div class="pop_container">
+      <h2>Stock Market</h2>
+      <p>Available Funds: $<span id="popup_stock_balance"></span></p>
+      <div class="stock_options">
+        <button class="button">Buy Stocks</button>
+        <button class="button">Sell Stocks</button>
+        <button class="button">View Portfolio</button>
+      </div>
+      <div class="close_button">
+        <button onclick="closePopup('stock_popup')">×</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loans Popup -->
+  <div class="pop_overlay hidden" id="loans_popup">
+    <div class="pop_container">
+      <h2>Loan Center</h2>
+      <p>Credit Score: <span id="popup_credit">750</span></p>
+      <div class="loan_options">
+        <button class="button">Apply for Loan</button>
+        <button class="button">View Active Loans</button>
+        <button class="button">Make Payment</button>
+      </div>
+      <div class="close_button">
+        <button onclick="closePopup('loans_popup')">×</button>
       </div>
     </div>
   </div>

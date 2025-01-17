@@ -1,12 +1,21 @@
-const bank = document.getElementById('bank');
-const popup = document.querySelector('.pop_overlay');
-const popup_balance = document.getElementById('popup_balance');
+// DOM Elements
+const bankButton = document.getElementById('bank');
+const popupOverlay = document.querySelector('.pop_overlay');
+const popupBalance = document.getElementById('popup_balance');
+const playerCountOverlay = document.getElementById('player_count_overlay');
+const playerCountInput = document.getElementById('player_count_input');
+const playerSelect = document.getElementById('player-select');
+const playerRows = document.querySelectorAll('.player-row');
+const playerRowsContainer = document.querySelector('.player-rows');
+const propertyPopup = document.getElementById('property_popup');
+const popupProperty = document.getElementById('popup_property');
+const bankPopup = document.getElementById('bank_popup');
+const stockPopup = document.getElementById('stock_popup');
+const popupStockBalance = document.getElementById('popup_stock_balance');
+const loansPopup = document.getElementById('loans_popup');
 
-
-class player
-{
-    constructor(name, job, total, product, debuff) 
-    {
+class player {
+    constructor(name, job, total, product, debuff) {
         this.name = name;
         this.job = job;
         this.total = total;
@@ -14,33 +23,146 @@ class player
         this.debuff = debuff;
     }
 }
-const name = ["Adam", "Frank", "Sunny", "Ethan"];
-const job = ["Lawyer", "Computer Engineer", "Dentist", "Robber"];
-const total = [1000, 20000, 300, 0];
-const product = ["None", "House", "Car"];
-const debuff = ["None", "Broken leg"];
 
-player1 = new player(name[Math.floor(Math.random() * 4)], job[Math.floor(Math.random() * 4)], total[Math.floor(Math.random() * 4)], product[Math.floor(Math.random() * 3)], debuff[Math.floor(Math.random() * 2)]);
-player2 = new player(name[Math.floor(Math.random() * 4)], job[Math.floor(Math.random() * 4)], total[Math.floor(Math.random() * 4)], product[Math.floor(Math.random() * 3)], debuff[Math.floor(Math.random() * 2)]);
-player3 = new player(name[Math.floor(Math.random() * 4)], job[Math.floor(Math.random() * 4)], total[Math.floor(Math.random() * 4)], product[Math.floor(Math.random() * 3)], debuff[Math.floor(Math.random() * 2)]);
-player4 = new player(name[Math.floor(Math.random() * 4)], job[Math.floor(Math.random() * 4)], total[Math.floor(Math.random() * 4)], product[Math.floor(Math.random() * 3)], debuff[Math.floor(Math.random() * 2)]);
-player5 = new player(name[Math.floor(Math.random() * 4)], job[Math.floor(Math.random() * 4)], total[Math.floor(Math.random() * 4)], product[Math.floor(Math.random() * 3)], debuff[Math.floor(Math.random() * 2)]);
+// Initialize empty players array
+const players = [];
+let activePlayerCount = 0;
+let selectedPlayer = null;
 
+async function loadGameData() {
+    try {
+        // This method is completely free
+        const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS_UfHOtMDSXFBISoWiUahDbKxKHKFd9aiWQFQDEEuXHfjGze17jFt-DtRigL9UGX-ap29XzHAggKRg/pub?gid=0&single=true&output=csv');
 
-function load()
-{
-    document.getElementById("name1").innerHTML = player1.name;
-    document.getElementById("job1").innerHTML = player1.job;
-    document.getElementById("total1").innerHTML = "$" + player1.total;
-    document.getElementById("product1").innerHTML = player1.product;
+        const csvText = await response.text();
+        
+        // Parse CSV (skip header row)
+        const rows = csvText.split('\n').slice(1);
+        const gameData = rows.map(row => {
+            const [name, job, total, product, debuff] = row.split(',');
+            return new player(name, job, parseInt(total), product, debuff);
+        });
+        
+        // Clear existing players array
+        players.length = 0;
+        
+        // Create 15 players using random selections from the CSV data
+        for (let i = 0; i < 15; i++) {
+            const randomData = gameData[Math.floor(Math.random() * gameData.length)];
+            players.push(new player(
+                randomData.name,
+                randomData.job,
+                randomData.total,
+                randomData.product,
+                randomData.debuff
+            ));
+        }
+        
+        selectedPlayer = players[0];
+        initializeGame();
+        
+    } catch (error) {
+        console.error('Error loading game data:', error);
+    }
+}
+
+function initializeGame() {
+    // Create the player rows dynamically
+    playerRowsContainer.innerHTML = ''; // Clear existing rows
+    
+    for (let i = 0; i < 15; i++) {
+        const row = document.createElement('div');
+        row.className = 'player-row hidden';
+        row.innerHTML = `
+            <div class="column name">${i + 1}.${players[i].name}</div>
+            <div class="column career">${players[i].job}</div>
+            <div class="column money">$${players[i].total}</div>
+            <div class="column property">${players[i].product}</div>
+        `;
+        playerRowsContainer.appendChild(row);
+    }
+    
+    // Show player count selection overlay
+    playerCountOverlay.classList.remove('hidden');
+}
+
+function startGame() {
+    const playerCount = parseInt(playerCountInput.value);
+    
+    if (playerCount < 2 || playerCount > 15 || isNaN(playerCount)) {
+        alert('Please enter a number between 2 and 15');
+        return;
+    }
+    
+    activePlayerCount = playerCount;
+    
+    // Hide the overlay
+    playerCountOverlay.classList.add('hidden');
+    
+    // Show selected number of player rows
+    const allPlayerRows = document.querySelectorAll('.player-row');
+    allPlayerRows.forEach((row, index) => {
+        if (index < playerCount) {
+            row.classList.remove('hidden');
+        } else {
+            row.classList.add('hidden');
+        }
+    });
+    
+    // Update player selector options
+    playerSelect.innerHTML = ''; // Clear existing options
+    for (let i = 0; i < playerCount; i++) {
+        const option = document.createElement('option');
+        option.value = i + 1;
+        option.textContent = `Player ${i + 1}`;
+        playerSelect.appendChild(option);
+    }
+    
+    selectedPlayer = players[0];
+    updateDisplayedInfo();
+}
+
+function updateSelectedPlayer() {
+    const playerNum = parseInt(playerSelect.value);
+    selectedPlayer = players[playerNum - 1];
+    updateDisplayedInfo();
+}
+
+function updateDisplayedInfo() {
+    const allPlayerRows = document.querySelectorAll('.player-row');
+    allPlayerRows.forEach((row, index) => {
+        if (index < activePlayerCount) {
+            const player = players[index];
+            row.querySelector('.name').textContent = `${index + 1}.${player.name}`;
+            row.querySelector('.career').textContent = player.job;
+            row.querySelector('.money').textContent = '$' + player.total;
+            row.querySelector('.property').textContent = player.product;
+        }
+    });
+}
+
+function propertyc() {
+    propertyPopup.classList.remove('hidden');
+    popupProperty.textContent = selectedPlayer.product;
 }
 
 function bankc() {
-    popup.classList.remove('hidden');
-    popup_balance.innerHTML = player1.total;
+    bankPopup.classList.remove('hidden');
+    popupBalance.textContent = selectedPlayer.total;
 }
 
-function closePopup() {
-    popup.classList.add('hidden');
+function stockc() {
+    stockPopup.classList.remove('hidden');
+    popupStockBalance.textContent = selectedPlayer.total;
 }
-//give hidden class to all element, how much number input, for loop and remove the hidden element
+
+function loansc() {
+    loansPopup.classList.remove('hidden');
+}
+
+function closePopup(popupId) {
+    document.getElementById(popupId).classList.add('hidden');
+}
+
+// Initialize the game by loading data first
+window.onload = loadGameData;
