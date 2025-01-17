@@ -1,4 +1,3 @@
-// DOM Elements
 const bankButton = document.getElementById('bank');
 const popupOverlay = document.querySelector('.pop_overlay');
 const popupBalance = document.getElementById('popup_balance');
@@ -14,6 +13,12 @@ const stockPopup = document.getElementById('stock_popup');
 const popupStockBalance = document.getElementById('popup_stock_balance');
 const loansPopup = document.getElementById('loans_popup');
 
+
+
+
+
+
+
 class player {
     constructor(name, job, total, product, debuff) {
         this.name = name;
@@ -24,29 +29,24 @@ class player {
     }
 }
 
-// Initialize empty players array
 const players = [];
 let activePlayerCount = 0;
 let selectedPlayer = null;
 
 async function loadGameData() {
     try {
-        // This method is completely free
         const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS_UfHOtMDSXFBISoWiUahDbKxKHKFd9aiWQFQDEEuXHfjGze17jFt-DtRigL9UGX-ap29XzHAggKRg/pub?gid=0&single=true&output=csv');
 
         const csvText = await response.text();
         
-        // Parse CSV (skip header row)
         const rows = csvText.split('\n').slice(1);
         const gameData = rows.map(row => {
             const [name, job, total, product, debuff] = row.split(',');
             return new player(name, job, parseInt(total), product, debuff);
         });
         
-        // Clear existing players array
         players.length = 0;
         
-        // Create 15 players using random selections from the CSV data
         for (let i = 0; i < 15; i++) {
             const randomData = gameData[Math.floor(Math.random() * gameData.length)];
             players.push(new player(
@@ -67,8 +67,8 @@ async function loadGameData() {
 }
 
 function initializeGame() {
-    // Create the player rows dynamically
-    playerRowsContainer.innerHTML = ''; // Clear existing rows
+
+    playerRowsContainer.innerHTML = '';
     
     for (let i = 0; i < 15; i++) {
         const row = document.createElement('div');
@@ -82,7 +82,6 @@ function initializeGame() {
         playerRowsContainer.appendChild(row);
     }
     
-    // Show player count selection overlay
     playerCountOverlay.classList.remove('hidden');
 }
 
@@ -96,10 +95,8 @@ function startGame() {
     
     activePlayerCount = playerCount;
     
-    // Hide the overlay
     playerCountOverlay.classList.add('hidden');
     
-    // Show selected number of player rows
     const allPlayerRows = document.querySelectorAll('.player-row');
     allPlayerRows.forEach((row, index) => {
         if (index < playerCount) {
@@ -109,8 +106,7 @@ function startGame() {
         }
     });
     
-    // Update player selector options
-    playerSelect.innerHTML = ''; // Clear existing options
+    playerSelect.innerHTML = ''; 
     for (let i = 0; i < playerCount; i++) {
         const option = document.createElement('option');
         option.value = i + 1;
@@ -164,5 +160,4 @@ function closePopup(popupId) {
     document.getElementById(popupId).classList.add('hidden');
 }
 
-// Initialize the game by loading data first
 window.onload = loadGameData;
