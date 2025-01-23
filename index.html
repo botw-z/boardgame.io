@@ -59,20 +59,22 @@
       </div>
     </div>
 
+    <!-- Player Selector -->
+    <div class="player-selector">
+      <label for="player-select">Select Player:</label>
+      <select id="player-select" onchange="updateSelectedPlayer()">
+        <option value="1">Player 1</option>
+        <option value="2">Player 2</option>
+        <option value="3">Player 3</option>
+        <option value="4">Player 4</option>
+        <option value="5">Player 5</option>
+      </select>
+    </div>
+
     <!-- Event Search -->
     <div class="event-search">
       <h2>EVENT SEARCH</h2>
       <input type="text" placeholder="Search">
-      <div class="player-selector">
-        <label for="player-select">Select Player:</label>
-        <select id="player-select" onchange="updateSelectedPlayer()">
-          <option value="1">Player 1</option>
-          <option value="2">Player 2</option>
-          <option value="3">Player 3</option>
-          <option value="4">Player 4</option>
-          <option value="5">Player 5</option>
-        </select>
-      </div>
     </div>
 
     <!-- Buttons -->
@@ -93,66 +95,115 @@
   <!-- Property Popup -->
   <div class="pop_overlay hidden" id="property_popup">
     <div class="pop_container">
-      <h2>Property Options</h2>
-      <p>Current Property: <span id="popup_property"></span></p>
-      <div class="property_options">
-        <button class="button">Buy</button>
-        <button class="button">Sell</button>
-        <button class="button">Rent</button>
-      </div>
-      <div class="close_button">
-        <button onclick="closePopup('property_popup')">×</button>
-      </div>
+        <h2>Property Options</h2>
+        <div class="property-lists">
+            <div class="property-section">
+                <h3>Cars</h3>
+                <div id="cars-list"></div>
+                <div class="property-controls">
+                    <select id="car-selector" onchange="updatePropertyPrice('car')">
+                        <option value="">Select a car</option>
+                    </select>
+                    <button class="button" id="car-buy-btn" onclick="buyProperty('car')" disabled>Buy: $0</button>
+                    <button class="button" id="car-sell-btn" onclick="sellProperty('car')" disabled>Sell: $0</button>
+                </div>
+            </div>
+            <div class="property-section">
+                <h3>Houses</h3>
+                <div id="houses-list"></div>
+                <div class="property-controls">
+                    <select id="house-selector" onchange="updatePropertyPrice('house')">
+                        <option value="">Select a house</option>
+                    </select>
+                    <button class="button" id="house-buy-btn" onclick="buyProperty('house')" disabled>Buy: $0</button>
+                    <button class="button" id="house-sell-btn" onclick="sellProperty('house')" disabled>Sell: $0</button>
+                </div>
+            </div>
+        </div>
+        <div class="close_button">
+            <button onclick="closePopup('property_popup')">×</button>
+        </div>
     </div>
-  </div>
+</div>
 
   <!-- Bank Popup -->
   <div class="pop_overlay hidden" id="bank_popup">
     <div class="pop_container">
-      <h2>Banking Options</h2>
-      <p>Current Balance: $<span id="popup_balance"></span></p>
-      <div class="banking_options">
-        <button class="button">Deposit</button>
-        <button class="button">Withdraw</button>
-        <button class="button">Transfer</button>
-      </div>
-      <div class="close_button">
-        <button onclick="closePopup('bank_popup')">×</button>
-      </div>
+        <h2>Banking Options</h2>
+        <div class="bank-info">
+            <div class="balance-info">
+                <h3>Current Balance:</h3>
+                <p>$<span id="popup_balance">0</span></p>
+            </div>
+            <div class="balance-info">
+                <h3>Bank Balance:</h3>
+                <p>$<span id="popup_bank_balance">0</span></p>
+                <p class="interest-note">Earns 0.05% interest per round</p>
+            </div>
+        </div>
+        <div class="banking-options">
+            <button class="button" onclick="deposit()">Deposit</button>
+            <button class="button" onclick="withdraw()">Withdraw</button>
+        </div>
+        <!-- Add forms for deposit and withdraw -->
+        <div id="deposit-form" class="bank-form-overlay hidden"></div>
+        <div id="withdraw-form" class="bank-form-overlay hidden"></div>
+        <div class="close_button">
+            <button onclick="closePopup('bank_popup')">×</button>
+        </div>
     </div>
-  </div>
+</div>
 
   <!-- Stock Popup -->
   <div class="pop_overlay hidden" id="stock_popup">
     <div class="pop_container">
-      <h2>Stock Market</h2>
-      <p>Available Funds: $<span id="popup_stock_balance"></span></p>
-      <div class="stock_options">
-        <button class="button">Buy Stocks</button>
-        <button class="button">Sell Stocks</button>
-        <button class="button">View Portfolio</button>
-      </div>
-      <div class="close_button">
-        <button onclick="closePopup('stock_popup')">×</button>
-      </div>
+        <h2>Stock Market</h2>
+        <p>Available Funds: $<span id="popup_stock_balance"></span></p>
+        <div class="stock_options">
+            <div class="stock-type">
+                <h3>Tech Stock: $<span id="tech-price">100</span></h3>
+                <button class="button" onclick="buyStock('tech')">Buy</button>
+                <button class="button" onclick="sellStock('tech')">Sell</button>
+            </div>
+            <div class="stock-type">
+                <h3>Energy Stock: $<span id="energy-price">150</span></h3>
+                <button class="button" onclick="buyStock('energy')">Buy</button>
+                <button class="button" onclick="sellStock('energy')">Sell</button>
+            </div>
+            <div class="stock-type">
+                <h3>Health Stock: $<span id="health-price">200</span></h3>
+                <button class="button" onclick="buyStock('health')">Buy</button>
+                <button class="button" onclick="sellStock('health')">Sell</button>
+            </div>
+        </div>
+        <div class="close_button">
+            <button onclick="closePopup('stock_popup')">×</button>
+        </div>
     </div>
-  </div>
+</div>
 
   <!-- Loans Popup -->
   <div class="pop_overlay hidden" id="loans_popup">
     <div class="pop_container">
-      <h2>Loan Center</h2>
-      <p>Credit Score: <span id="popup_credit">750</span></p>
-      <div class="loan_options">
-        <button class="button">Apply for Loan</button>
-        <button class="button">View Active Loans</button>
-        <button class="button">Make Payment</button>
-      </div>
-      <div class="close_button">
-        <button onclick="closePopup('loans_popup')">×</button>
-      </div>
+        <h2>Loan Center</h2>
+        <p>Current Loan: $<span id="current-loan">0</span></p>
+        <div class="loan_options">
+            <button class="button" onclick="takeLoan()">Take Loan</button>
+            <button class="button" onclick="payLoan()">Pay Loan</button>
+        </div>
+        <div class="close_button">
+            <button onclick="closePopup('loans_popup')">×</button>
+        </div>
     </div>
-  </div>
+</div>
+
+<!-- Notification Popup -->
+<div class="notification-popup hidden" id="notification_popup">
+    <div class="notification-content">
+        <p id="notification-message"></p>
+        <button class="button" onclick="closeNotification()">OK</button>
+    </div>
+</div>
   <script src="./script.js"></script>
 </body>
 </html>

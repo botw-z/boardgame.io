@@ -1,0 +1,62 @@
+{
+  "cars": [
+    {
+      "name": "Toyota Camry",
+      "initialBuyPrice": 25000,
+      "initialSellPrice": 20000,
+      "currentBuyPrice": 25000,
+      "currentSellPrice": 20000
+    },
+    {
+      "name": "Honda Civic",
+      "initialBuyPrice": 22000,
+      "initialSellPrice": 18000,
+      "currentBuyPrice": 22000,
+      "currentSellPrice": 18000
+    },
+    {
+      "name": "Tesla Model 3",
+      "initialBuyPrice": 45000,
+      "initialSellPrice": 38000,
+      "currentBuyPrice": 45000,
+      "currentSellPrice": 38000
+    },
+    {
+      "name": "BMW 3 Series",
+      "initialBuyPrice": 40000,
+      "initialSellPrice": 32000,
+      "currentBuyPrice": 40000,
+      "currentSellPrice": 32000
+    }
+  ],
+  "houses": [
+    {
+      "name": "Suburban House",
+      "initialBuyPrice": 250000,
+      "initialSellPrice": 220000,
+      "currentBuyPrice": 250000,
+      "currentSellPrice": 220000
+    },
+    {
+      "name": "City Apartment",
+      "initialBuyPrice": 180000,
+      "initialSellPrice": 160000,
+      "currentBuyPrice": 180000,
+      "currentSellPrice": 160000
+    },
+    {
+      "name": "Beach House",
+      "initialBuyPrice": 400000,
+      "initialSellPrice": 350000,
+      "currentBuyPrice": 400000,
+      "currentSellPrice": 350000
+    },
+    {
+      "name": "Mountain Cabin",
+      "initialBuyPrice": 200000,
+      "initialSellPrice": 175000,
+      "currentBuyPrice": 200000,
+      "currentSellPrice": 175000
+    }
+  ]
+} 

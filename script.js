@@ -13,37 +13,40 @@ const stockPopup = document.getElementById('stock_popup');
 const popupStockBalance = document.getElementById('popup_stock_balance');
 const loansPopup = document.getElementById('loans_popup');
 
+let root = document.documentElement;
 
-
-
-
-
+let propertyData = {
+    cars: [],
+    houses: []
+};
 
 class player {
-    constructor(name, job, total, product, debuff) {
-        this.name = name;
+    constructor(job, wage, total, cars = [], houses = []) {
         this.job = job;
-        this.total = total;
-        this.product = product;
-        this.debuff = debuff;
+        this.wage = parseInt(wage);
+        this.total = parseInt(total);
+        this.bankBalance = 0;
+        this.cars = Array.isArray(cars) ? cars : [];
+        this.houses = Array.isArray(houses) ? houses : [];
     }
 }
 
 const players = [];
 let activePlayerCount = 0;
 let selectedPlayer = null;
+let events = [];
 
 async function loadGameData() {
     try {
-        //dateset
         const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS_UfHOtMDSXFBISoWiUahDbKxKHKFd9aiWQFQDEEuXHfjGze17jFt-DtRigL9UGX-ap29XzHAggKRg/pub?gid=0&single=true&output=csv');
 
         const csvText = await response.text();
+        console.log(csvText);
         
         const rows = csvText.split('\n').slice(1);
         const gameData = rows.map(row => {
-            const [name, job, total, product, debuff] = row.split(',');
-            return new player(name, job, parseInt(total), product, debuff);
+            const [job, wage, total, cars, houses] = row.split(',');
+            return new player(job, parseInt(wage), parseInt(total), cars, houses);
         });
         
         players.length = 0;
@@ -51,19 +54,31 @@ async function loadGameData() {
         for (let i = 0; i < 15; i++) {
             const randomData = gameData[Math.floor(Math.random() * gameData.length)];
             players.push(new player(
-                randomData.name,
                 randomData.job,
+                randomData.wage,
                 randomData.total,
-                randomData.product,
-                randomData.debuff
+                randomData.cars,
+                randomData.houses,
             ));
         }
         
         selectedPlayer = players[0];
         initializeGame();
         
+        debugPlayerData(); // Add this line after loading data
+        
     } catch (error) {
         console.error('Error loading game data:', error);
+    }
+}
+
+async function loadPropertyData() {
+    try {
+        const response = await fetch('./properties.json');
+        const data = await response.json();
+        propertyData = data;
+    } catch (error) {
+        console.error('Error loading property data:', error);
     }
 }
 
@@ -75,10 +90,11 @@ function initializeGame() {
         const row = document.createElement('div');
         row.className = 'player-row hidden';
         row.innerHTML = `
-            <div class="column name">${i + 1}.${players[i].name}</div>
+            <div class="column name">Player ${i + 1}</div>
             <div class="column career">${players[i].job}</div>
             <div class="column money">$${players[i].total}</div>
-            <div class="column property">${players[i].product}</div>
+            <div class="column cars">Cars: ${players[i].cars.length}</div>
+            <div class="column houses">Houses: ${players[i].houses.length}</div>
         `;
         playerRowsContainer.appendChild(row);
     }
@@ -130,35 +146,529 @@ function updateDisplayedInfo() {
     allPlayerRows.forEach((row, index) => {
         if (index < activePlayerCount) {
             const player = players[index];
-            row.querySelector('.name').textContent = `${index + 1}.${player.name}`;
+            row.querySelector('.name').textContent = `Player ${index + 1}`;
             row.querySelector('.career').textContent = player.job;
-            row.querySelector('.money').textContent = '$' + player.total;
-            row.querySelector('.property').textContent = player.product;
+            row.querySelector('.money').textContent = '$' + player.total.toLocaleString();
+            
+            // Update cars display
+            const carsText = player.cars && player.cars.length > 0 ? 
+                player.cars.map(car => car.name).join(', ') : 
+                'No cars';
+            row.querySelector('.cars').textContent = carsText;
+            
+            // Update houses display
+            const housesText = player.houses && player.houses.length > 0 ? 
+                player.houses.map(house => house.name).join(', ') : 
+                'No houses';
+            row.querySelector('.houses').textContent = housesText;
+            
+            row.classList.remove('hidden');
+        } else {
+            row.classList.add('hidden');
         }
     });
 }
 
 function propertyc() {
     propertyPopup.classList.remove('hidden');
-    popupProperty.textContent = selectedPlayer.product;
+    
+    // Update property lists
+    const carsList = document.getElementById('cars-list');
+    const housesList = document.getElementById('houses-list');
+    const carSelector = document.getElementById('car-selector');
+    const houseSelector = document.getElementById('house-selector');
+    
+    // Reset selectors
+    carSelector.innerHTML = '<option value="">Select a car</option>';
+    houseSelector.innerHTML = '<option value="">Select a house</option>';
+    
+    // Display owned properties
+    carsList.innerHTML = `
+        <h4>Cars Owned:</h4>
+        <div class="owned-properties">
+            ${selectedPlayer.cars && selectedPlayer.cars.length > 0 ? 
+                selectedPlayer.cars.map(car => `
+                    <div class="owned-property-item">
+                        ${car.name}
+                        <div class="property-value">Current value: $${car.currentSellPrice?.toLocaleString() || 0}</div>
+                    </div>
+                `).join('') : '<p>No cars owned</p>'}
+        </div>
+    `;
+    
+    housesList.innerHTML = `
+        <h4>Houses Owned:</h4>
+        <div class="owned-properties">
+            ${selectedPlayer.houses && selectedPlayer.houses.length > 0 ? 
+                selectedPlayer.houses.map(house => `
+                    <div class="owned-property-item">
+                        ${house.name}
+                        <div class="property-value">Current value: $${house.currentSellPrice?.toLocaleString() || 0}</div>
+                    </div>
+                `).join('') : '<p>No houses owned</p>'}
+        </div>
+    `;
+    
+    // Add available properties to selectors
+    propertyData.cars.forEach(car => {
+        const option = new Option(
+            `${car.name} ($${car.currentBuyPrice.toLocaleString()})`,
+            car.name
+        );
+        carSelector.add(option);
+    });
+    
+    propertyData.houses.forEach(house => {
+        const option = new Option(
+            `${house.name} ($${house.currentBuyPrice.toLocaleString()})`,
+            house.name
+        );
+        houseSelector.add(option);
+    });
+    
+    // Reset buttons
+    updatePropertyPrice('car');
+    updatePropertyPrice('house');
+}
+
+function updatePropertyPrice(type) {
+    const selector = document.getElementById(`${type}-selector`);
+    const buyBtn = document.getElementById(`${type}-buy-btn`);
+    const sellBtn = document.getElementById(`${type}-sell-btn`);
+    
+    const selectedValue = selector.value;
+    
+    if (selectedValue) {
+        const property = propertyData[type + 's'].find(p => p.name === selectedValue);
+        const ownedProperty = selectedPlayer[type + 's']?.find(p => p.name === selectedValue);
+        
+        buyBtn.textContent = `Buy: $${property.currentBuyPrice.toLocaleString()}`;
+        buyBtn.disabled = false;
+        
+        if (ownedProperty) {
+            sellBtn.textContent = `Sell: $${property.currentSellPrice.toLocaleString()}`;
+            sellBtn.disabled = false;
+        } else {
+            sellBtn.textContent = 'Sell: $0';
+            sellBtn.disabled = true;
+        }
+    } else {
+        buyBtn.textContent = 'Buy: $0';
+        sellBtn.textContent = 'Sell: $0';
+        buyBtn.disabled = true;
+        sellBtn.disabled = true;
+    }
+}
+
+function buyProperty(type) {
+    const selector = document.getElementById(`${type}-selector`);
+    const propertyName = selector.value;
+    const property = propertyData[type + 's'].find(p => p.name === propertyName);
+    
+    if (!property) return;
+
+    if (selectedPlayer.total >= property.currentBuyPrice) {
+        selectedPlayer.total -= property.currentBuyPrice;
+        
+        if (!selectedPlayer[type + 's']) {
+            selectedPlayer[type + 's'] = [];
+        }
+        
+        selectedPlayer[type + 's'].push({
+            name: property.name,
+            currentSellPrice: property.currentSellPrice,
+            purchasePrice: property.currentBuyPrice
+        });
+        
+        updateDisplayedInfo();
+        propertyc(); // Refresh the property display
+        showNotification(`Successfully purchased ${property.name}!`);
+    } else {
+        showNotification("Not enough money!");
+    }
+}
+
+function sellProperty(type) {
+    const selector = document.getElementById(`${type}-selector`);
+    const propertyName = selector.value;
+    const propertyIndex = selectedPlayer[type + 's']?.findIndex(p => p.name === propertyName);
+    
+    if (propertyIndex === -1) return;
+
+    const property = propertyData[type + 's'].find(p => p.name === propertyName);
+    selectedPlayer.total += property.currentSellPrice;
+    selectedPlayer[type + 's'].splice(propertyIndex, 1);
+    
+    updateDisplayedInfo();
+    propertyc(); // Refresh the property display
+    showNotification(`Successfully sold ${property.name}!`);
 }
 
 function bankc() {
     bankPopup.classList.remove('hidden');
-    popupBalance.textContent = selectedPlayer.total;
+    document.getElementById('popup_balance').textContent = selectedPlayer.total.toLocaleString();
+    document.getElementById('popup_bank_balance').textContent = selectedPlayer.bankBalance.toLocaleString();
+}
+
+function deposit() {
+    const depositForm = document.getElementById('deposit-form');
+    const maxDeposit = selectedPlayer.total;
+    
+    depositForm.innerHTML = `
+        <div class="bank-form">
+            <h3>Deposit Money</h3>
+            <p>Available to deposit: $${maxDeposit.toLocaleString()}</p>
+            <input type="number" id="deposit-amount" min="0" max="${maxDeposit}" placeholder="Enter amount">
+            <div class="bank-form-buttons">
+                <button class="button" onclick="confirmDeposit()">Confirm</button>
+                <button class="button" onclick="closeDepositForm()">Cancel</button>
+            </div>
+        </div>
+    `;
+    
+    depositForm.classList.remove('hidden');
+}
+
+function withdraw() {
+    const withdrawForm = document.getElementById('withdraw-form');
+    const maxWithdraw = selectedPlayer.bankBalance;
+    
+    withdrawForm.innerHTML = `
+        <div class="bank-form">
+            <h3>Withdraw Money</h3>
+            <p>Available to withdraw: $${maxWithdraw.toLocaleString()}</p>
+            <input type="number" id="withdraw-amount" min="0" max="${maxWithdraw}" placeholder="Enter amount">
+            <div class="bank-form-buttons">
+                <button class="button" onclick="confirmWithdraw()">Confirm</button>
+                <button class="button" onclick="closeWithdrawForm()">Cancel</button>
+            </div>
+        </div>
+    `;
+    
+    withdrawForm.classList.remove('hidden');
+}
+
+function confirmDeposit() {
+    const amount = parseInt(document.getElementById('deposit-amount').value);
+    if (amount && amount > 0 && amount <= selectedPlayer.total) {
+        selectedPlayer.total -= amount;
+        selectedPlayer.bankBalance += amount;
+        updateDisplayedInfo();
+        bankc(); // Refresh bank display
+        closeDepositForm();
+        showNotification(`Successfully deposited $${amount.toLocaleString()}`);
+    } else {
+        showNotification("Invalid amount!");
+    }
+}
+
+function confirmWithdraw() {
+    const amount = parseInt(document.getElementById('withdraw-amount').value);
+    if (amount && amount > 0 && amount <= selectedPlayer.bankBalance) {
+        selectedPlayer.bankBalance -= amount;
+        selectedPlayer.total += amount;
+        updateDisplayedInfo();
+        bankc(); // Refresh bank display
+        closeWithdrawForm();
+        showNotification(`Successfully withdrew $${amount.toLocaleString()}`);
+    } else {
+        showNotification("Invalid amount!");
+    }
+}
+
+function closeDepositForm() {
+    document.getElementById('deposit-form').classList.add('hidden');
+}
+
+function closeWithdrawForm() {
+    document.getElementById('withdraw-form').classList.add('hidden');
 }
 
 function stockc() {
     stockPopup.classList.remove('hidden');
     popupStockBalance.textContent = selectedPlayer.total;
+    updateStockPrices();
 }
 
 function loansc() {
     loansPopup.classList.remove('hidden');
+    updateLoanInfo();
+}
+
+// Stock functions
+let stockPrices = {
+    tech: 100,
+    energy: 150,
+    health: 200
+};
+
+function updateStockPrices() {
+    Object.keys(stockPrices).forEach(stock => {
+        const change = Math.random() > 0.5 ? 1.1 : 0.9;
+        stockPrices[stock] = Math.round(stockPrices[stock] * change);
+        document.getElementById(`${stock}-price`).textContent = stockPrices[stock];
+    });
+}
+
+function buyStock(stock) {
+    const amount = parseInt(prompt(`How many ${stock} stocks to buy?`));
+    const total = amount * stockPrices[stock];
+    
+    if (amount && amount > 0 && total <= selectedPlayer.total) {
+        selectedPlayer.total -= total;
+        selectedPlayer[`${stock}Stocks`] = (selectedPlayer[`${stock}Stocks`] || 0) + amount;
+        updateDisplayedInfo();
+        closePopup('stock_popup');
+    } else {
+        showNotification("Invalid amount or insufficient funds!");
+    }
+}
+
+function sellStock(stock) {
+    const maxAmount = selectedPlayer[`${stock}Stocks`] || 0;
+    if (maxAmount === 0) {
+        showNotification("No stocks to sell!");
+        return;
+    }
+    
+    const amount = parseInt(prompt(`How many ${stock} stocks to sell? (You have ${maxAmount})`));
+    if (amount && amount > 0 && amount <= maxAmount) {
+        const total = amount * stockPrices[stock];
+        selectedPlayer.total += total;
+        selectedPlayer[`${stock}Stocks`] -= amount;
+        updateDisplayedInfo();
+        closePopup('stock_popup');
+    } else {
+        showNotification("Invalid amount!");
+    }
+}
+
+// Loan functions
+function updateLoanInfo() {
+    const loanAmount = selectedPlayer.loan || 0;
+    document.getElementById('current-loan').textContent = loanAmount;
+}
+
+function takeLoan() {
+    const amount = parseInt(prompt("Enter loan amount:"));
+    if (amount && amount > 0) {
+        selectedPlayer.loan = (selectedPlayer.loan || 0) + amount;
+        selectedPlayer.total += amount;
+        updateDisplayedInfo();
+        updateLoanInfo();
+    } else {
+        showNotification("Invalid amount!");
+    }
+}
+
+function payLoan() {
+    const currentLoan = selectedPlayer.loan || 0;
+    if (currentLoan === 0) {
+        showNotification("No loan to pay!");
+        return;
+    }
+    
+    const amount = parseInt(prompt(`Enter amount to pay (Current loan: ${currentLoan}):`));
+    if (amount && amount > 0 && amount <= selectedPlayer.total) {
+        if (amount > currentLoan) {
+            showNotification("Payment amount larger than loan!");
+            return;
+        }
+        selectedPlayer.loan -= amount;
+        selectedPlayer.total -= amount;
+        updateDisplayedInfo();
+        updateLoanInfo();
+    } else {
+        showNotification("Invalid amount or insufficient funds!");
+    }
 }
 
 function closePopup(popupId) {
     document.getElementById(popupId).classList.add('hidden');
 }
 
-window.onload = loadGameData;
+// Add age tracking
+let currentAge = 20;
+
+function nextRound() {
+    if (currentAge < 80) {
+        currentAge++;
+        document.querySelector('.age').textContent = `AGE: ${currentAge}`;
+        
+        // Update property prices
+        updatePropertyPrices();
+        
+        // Add wage and calculate bank interest for each active player
+        for (let i = 0; i < activePlayerCount; i++) {
+            // Add wage
+            players[i].total += players[i].wage;
+            
+            // Calculate bank interest (0.05%)
+            const interest = Math.floor(players[i].bankBalance * 0.0005);
+            players[i].bankBalance += interest;
+            
+            // Update owned property prices
+            if (players[i].cars && players[i].cars.length > 0) {
+                players[i].cars.forEach(car => {
+                    const baseCar = propertyData.cars.find(c => c.name === car.name);
+                    if (baseCar) {
+                        car.currentSellPrice = baseCar.currentSellPrice;
+                    }
+                });
+            }
+            
+            if (players[i].houses && players[i].houses.length > 0) {
+                players[i].houses.forEach(house => {
+                    const baseHouse = propertyData.houses.find(h => h.name === house.name);
+                    if (baseHouse) {
+                        house.currentSellPrice = baseHouse.currentSellPrice;
+                    }
+                });
+            }
+        }
+        
+        updateDisplayedInfo();
+        if (!document.getElementById('property_popup').classList.contains('hidden')) {
+            propertyc(); // Refresh property display if it's open
+        }
+    } else {
+        showNotification("Game Over! Maximum age reached!");
+    }
+}
+
+// Add next round button event listener when window loads
+window.addEventListener('load', () => {
+    const nextRoundBtn = document.createElement('button');
+    nextRoundBtn.className = 'button next-round-btn';
+    nextRoundBtn.textContent = 'Next Round';
+    nextRoundBtn.onclick = nextRound;
+    document.querySelector('.container').appendChild(nextRoundBtn);
+    
+    // Set initial age
+    document.querySelector('.age').textContent = `AGE: ${currentAge}`;
+});
+
+// Load events data
+async function loadEvents() {
+    try {
+        const response = await fetch('./events.json');
+        const data = await response.json();
+        events = data.events;
+    } catch (error) {
+        console.error('Error loading events:', error);
+    }
+}
+
+// Add event search functionality
+const searchInput = document.querySelector('.event-search input');
+const searchResults = document.createElement('div');
+searchResults.className = 'search-results';
+searchInput.parentNode.insertBefore(searchResults, searchInput.nextSibling);
+
+searchInput.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    
+    if (searchTerm.length < 1) {
+        searchResults.innerHTML = '';
+        searchResults.style.display = 'none';  // Hide when no search term
+        return;
+    }
+
+    const matchingEvents = events.filter(event => 
+        event.name.toLowerCase().includes(searchTerm)
+    );
+
+    if (matchingEvents.length > 0) {
+        searchResults.style.display = 'flex';  // Show when there are results
+        searchResults.innerHTML = matchingEvents
+            .map(event => `
+                <button class="event-button" onclick="applyEvent('${event.name}')">
+                    ${event.name}
+                    <span class="event-tooltip">${event.description}</span>
+                </button>
+            `).join('');
+    } else {
+        searchResults.style.display = 'none';  // Hide when no matches
+        searchResults.innerHTML = '';
+    }
+});
+
+function applyEvent(eventName) {
+    const event = events.find(e => e.name === eventName);
+    if (!event) return;
+
+    const playerIndex = parseInt(playerSelect.value) - 1;
+    selectedPlayer = playerIndex;
+
+    switch (event.effect) {
+        case 'split_money':
+            // Divorce effect
+            players[selectedPlayer].total = Math.floor(players[selectedPlayer].total / 2);
+            break;
+        case 'increase_wage':
+            // Job Promotion effect
+            players[selectedPlayer].wage = Math.floor(players[selectedPlayer].wage * 1.2);
+            break;
+        case 'reduce_money':
+            // Market Crash effect
+            players[selectedPlayer].total = Math.floor(players[selectedPlayer].total * 0.7);
+            break;
+    }
+
+    // Update display
+    updateDisplayedInfo();
+    
+    // Clear search and hide results
+    searchInput.value = '';
+    searchResults.style.display = 'none';
+    searchResults.innerHTML = '';
+}
+
+// Load events when the page loads
+window.addEventListener('load', () => {
+    loadEvents();
+    loadGameData();
+    loadPropertyData();
+});
+
+window.addEventListener('mousemove', (e) => {
+    root.style.setProperty('--mouse-x', e.clientX + 'px');
+    root.style.setProperty('--mouse-y', e.clientY + 'px');
+});
+
+function showNotification(message) {
+    document.getElementById('notification-message').textContent = message;
+    document.getElementById('notification_popup').classList.remove('hidden');
+}
+
+function closeNotification() {
+    document.getElementById('notification_popup').classList.add('hidden');
+}
+
+function updatePropertyPrices() {
+    propertyData.cars.forEach(car => {
+        const change = 1 + (Math.random() * 0.025 - 0.005); // -0.5% to +2%
+        car.currentBuyPrice = Math.round(car.currentBuyPrice * change);
+        car.currentSellPrice = Math.round(car.currentSellPrice * change);
+    });
+
+    propertyData.houses.forEach(house => {
+        const change = 1 + (Math.random() * 0.025 - 0.005); // -0.5% to +2%
+        house.currentBuyPrice = Math.round(house.currentBuyPrice * change);
+        house.currentSellPrice = Math.round(house.currentSellPrice * change);
+    });
+}
+
+// Add debug logging
+function debugPlayerData() {
+    console.log("Active Player Count:", activePlayerCount);
+    players.forEach((player, index) => {
+        console.log(`Player ${index + 1}:`, {
+            job: player.job,
+            wage: player.wage,
+            total: player.total,
+            cars: player.cars,
+            houses: player.houses
+        });
+    });
+}

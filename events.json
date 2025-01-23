@@ -1,0 +1,22 @@
+{
+  "events": [
+    {
+      "name": "Divorce",
+      "effect": "split_money",
+      "description": "Total money is split in half",
+      "type": "negative"
+    },
+    {
+      "name": "Job Promotion",
+      "effect": "increase_wage",
+      "description": "Wage increases by 20%",
+      "type": "positive"
+    },
+    {
+      "name": "Market Crash",
+      "effect": "reduce_money",
+      "description": "Lose 30% of total money",
+      "type": "negative"
+    }
+  ]
+} 
