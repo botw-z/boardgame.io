@@ -27,10 +27,16 @@
           <h3>CAREER</h3>
         </div>
         <div class="column">
+          <h3>WAGE</h3>
+        </div>
+        <div class="column">
           <h3>MONEY</h3>
         </div>
         <div class="column">
-          <h3>PROPERTY</h3>
+          <h3>CAR</h3>
+        </div>
+        <div class="column">
+          <h3>HOUSE</h3>
         </div>
       </div>
       
@@ -38,10 +44,11 @@
       <div class="player-rows">
         <!-- Player row template (repeated 15 times) -->
         <div class="player-row hidden">
-          <div class="column name"></div>
           <div class="column career"></div>
+          <div class="column wage"></div>
           <div class="column money"></div>
-          <div class="column property"></div>
+          <div class="column car"></div>
+          <div class="column house"></div>
         </div>
         <!-- Repeat 14 more times -->
       </div>
@@ -130,24 +137,11 @@
   <div class="pop_overlay hidden" id="bank_popup">
     <div class="pop_container">
         <h2>Banking Options</h2>
-        <div class="bank-info">
-            <div class="balance-info">
-                <h3>Current Balance:</h3>
-                <p>$<span id="popup_balance">0</span></p>
-            </div>
-            <div class="balance-info">
-                <h3>Bank Balance:</h3>
-                <p>$<span id="popup_bank_balance">0</span></p>
-                <p class="interest-note">Earns 0.05% interest per round</p>
-            </div>
-        </div>
-        <div class="banking-options">
+        <p>Current Balance: $<span id="popup_balance"></span></p>
+        <div class="banking_options">
             <button class="button" onclick="deposit()">Deposit</button>
             <button class="button" onclick="withdraw()">Withdraw</button>
         </div>
-        <!-- Add forms for deposit and withdraw -->
-        <div id="deposit-form" class="bank-form-overlay hidden"></div>
-        <div id="withdraw-form" class="bank-form-overlay hidden"></div>
         <div class="close_button">
             <button onclick="closePopup('bank_popup')">×</button>
         </div>
