@@ -572,30 +572,52 @@ function applyEvent(eventName) {
     if (!event) return;
 
     const playerIndex = parseInt(playerSelect.value) - 1;
-    selectedPlayer = playerIndex;
+    selectedPlayer = players[playerIndex];
 
     switch (event.effect) {
         case 'split_money':
-            // Divorce effect
-            players[selectedPlayer].total = Math.floor(players[selectedPlayer].total / 2);
+            // Divorce effect - split everything in half
+            selectedPlayer.total = Math.floor(selectedPlayer.total / 2);
+            
+            // Split bank balance
+            if (selectedPlayer.bankBalance) {
+                selectedPlayer.bankBalance = Math.floor(selectedPlayer.bankBalance / 2);
+            }
+            
+            // Split stock values
+            if (selectedPlayer.stocks) {
+                Object.keys(selectedPlayer.stocks).forEach(company => {
+                    selectedPlayer.stocks[company] = Math.floor(selectedPlayer.stocks[company] / 2);
+                });
+            }
             break;
+            
         case 'increase_wage':
-            // Job Promotion effect
-            players[selectedPlayer].wage = Math.floor(players[selectedPlayer].wage * 1.2);
+            selectedPlayer.wage = Math.floor(selectedPlayer.wage * 1.2);
             break;
+            
         case 'reduce_money':
-            // Market Crash effect
-            players[selectedPlayer].total = Math.floor(players[selectedPlayer].total * 0.7);
+            selectedPlayer.total = Math.floor(selectedPlayer.total * 0.7);
             break;
     }
 
-    // Update display
+    // Update all displays
     updateDisplayedInfo();
     
-    // Clear search and hide results
+    // Refresh open popups
+    if (!document.getElementById('bank_popup').classList.contains('hidden')) {
+        bankc();
+    }
+    if (!document.getElementById('stock_popup').classList.contains('hidden')) {
+        stockc();
+    }
+    
+    // Clear search
     searchInput.value = '';
     searchResults.style.display = 'none';
     searchResults.innerHTML = '';
+    
+    showNotification(`Event applied: ${eventName}`);
 }
 
 // Load events when the page loads
