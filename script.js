@@ -349,7 +349,6 @@ function withdraw() {
 function stockc() {
     stockPopup.classList.remove('hidden');
     popupStockBalance.textContent = selectedPlayer.total;
-    updateStockPrices();
 }
 
 function loansc() {
@@ -359,9 +358,16 @@ function loansc() {
 
 // Stock functions
 let stockPrices = {
-    tech: 100,
-    energy: 150,
-    health: 200
+    Mitsubishi: 270.33,
+    Amazon: 4.4583,
+    Walmart: 14.3483,
+    Microsoft: 23.5817,
+    Apple: 135.8683,
+    Tesla: 675.5833,
+    Google: 2350.8333,
+    Facebook: 300.5833,
+    Netflix: 500.8333,
+    Disney: 150.3333
 };
 
 function updateStockPrices() {
@@ -492,6 +498,7 @@ function nextRound() {
         
         // Update all displays
         updateDisplayedInfo();
+        updateStockPrices();
         if (!document.getElementById('bank_popup').classList.contains('hidden')) {
             bankc();
         }
