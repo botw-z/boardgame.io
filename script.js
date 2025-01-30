@@ -140,6 +140,7 @@ function updateDisplayedInfo() {
             row.querySelector('.name').textContent = `Player ${index + 1}`;
             row.querySelector('.career').textContent = player.job;
             row.querySelector('.money').textContent = '$' + player.total.toLocaleString();
+            row.querySelector('.wage').textContent = '$' + player.wage.toLocaleString();
             
             // Update cars display
             const carsText = player.cars && player.cars.length > 0 ? 
@@ -392,6 +393,32 @@ function buyStock(stock) {
     }
 }
 
+function buyStock10(stock) {
+    const amount = 10;
+    const total = amount * stockPrices[stock];
+    if (amount && amount > 0 && total <= selectedPlayer.total) {
+        selectedPlayer.total -= total;
+        selectedPlayer[`${stock}Stocks`] = (selectedPlayer[`${stock}Stocks`] || 0) + amount;
+        updateDisplayedInfo();
+        closePopup('stock_popup');
+    } else {
+        showNotification("Invalid amount or insufficient funds!");
+    }
+}
+
+function buyStock100(stock) {
+    const amount = 100;
+    const total = amount * stockPrices[stock];
+    if (amount && amount > 0 && total <= selectedPlayer.total) {
+        selectedPlayer.total -= total;
+        selectedPlayer[`${stock}Stocks`] = (selectedPlayer[`${stock}Stocks`] || 0) + amount;
+        updateDisplayedInfo();
+        closePopup('stock_popup');
+    } else {
+        showNotification("Invalid amount or insufficient funds!");
+    }
+}
+
 function sellStock(stock) {
     const maxAmount = selectedPlayer[`${stock}Stocks`] || 0;
     if (maxAmount === 0) {
@@ -400,6 +427,44 @@ function sellStock(stock) {
     }
     
     const amount = parseInt(prompt(`How many ${stock} stocks to sell? (You have ${maxAmount})`));
+    if (amount && amount > 0 && amount <= maxAmount) {
+        const total = amount * stockPrices[stock];
+        selectedPlayer.total += total;
+        selectedPlayer[`${stock}Stocks`] -= amount;
+        updateDisplayedInfo();
+        closePopup('stock_popup');
+    } else {
+        showNotification("Invalid amount!");
+    }
+}
+
+function sellStock10(stock) {
+    const maxAmount = selectedPlayer[`${stock}Stocks`] || 0;
+    if (maxAmount === 0) {
+        showNotification("No stocks to sell!");
+        return;
+    }
+    
+    const amount = 10;
+    if (amount && amount > 0 && amount <= maxAmount) {
+        const total = amount * stockPrices[stock];
+        selectedPlayer.total += total;
+        selectedPlayer[`${stock}Stocks`] -= amount;
+        updateDisplayedInfo();
+        closePopup('stock_popup');
+    } else {
+        showNotification("Invalid amount!");
+    }
+}
+
+function sellStock100(stock) {
+    const maxAmount = selectedPlayer[`${stock}Stocks`] || 0;
+    if (maxAmount === 0) {
+        showNotification("No stocks to sell!");
+        return;
+    }
+    
+    const amount = 100;
     if (amount && amount > 0 && amount <= maxAmount) {
         const total = amount * stockPrices[stock];
         selectedPlayer.total += total;
@@ -456,56 +521,67 @@ function closePopup(popupId) {
 }
 
 // Add age tracking
-let currentAge = 20;
+let currentAge = 79;
 
 function nextRound() {
     if (currentAge < 80) {
-        currentAge++;
-        document.querySelector('.age').textContent = `AGE: ${currentAge}`;
+        // Show clock animation
+        const clockOverlay = document.getElementById('clock-overlay');
+        clockOverlay.classList.remove('hidden');
         
-        updatePropertyPrices();
-        
-        // Add wage and calculate bank interest for each player
-        for (let i = 0; i < activePlayerCount; i++) {
-            // Add wage
-            players[i].total += players[i].wage;
+        // Wait for animation to complete
+        setTimeout(() => {
+            // Hide clock
+            clockOverlay.classList.add('hidden');
             
-            // Calculate bank interest (0.5% per round)
-            if (players[i].bankBalance > 0) {
-                const interest = Math.floor(players[i].bankBalance * 0.005); // 0.5% interest
-                players[i].bankBalance += interest;
-                console.log(`Player ${i + 1} earned $${interest} in bank interest`);
+            // Proceed with age update
+            currentAge++;
+            document.querySelector('.age').textContent = `AGE: ${currentAge}`;
+            
+            // Rest of your nextRound logic...
+            updatePropertyPrices();
+            
+            for (let i = 0; i < activePlayerCount; i++) {
+                players[i].total += players[i].wage;
+                
+                if (players[i].bankBalance > 0) {
+                    const interest = Math.floor(players[i].bankBalance * 0.005);
+                    players[i].bankBalance += interest;
+                }
+                
+                if (players[i].stocks) {
+                    Object.keys(players[i].stocks).forEach(company => {
+                        const shares = players[i].stocks[company];
+                        if (shares > 0) {
+                            const stock = stockData.find(s => s.company === company);
+                            if (stock) {
+                                const newPrice = calculateCurrentPrice(stock);
+                                console.log(`${company}: ${shares} shares at $${newPrice.toFixed(2)} each`);
+                            }
+                        }
+                    });
+                }
             }
             
-            // Update property values
-            if (players[i].cars) {
-                players[i].cars.forEach(car => {
-                    const baseCar = propertyData.cars.find(c => c.name === car.name);
-                    if (baseCar) {
-                        car.currentSellPrice = baseCar.currentSellPrice;
-                    }
-                });
+            // Update displays
+            updateDisplayedInfo();
+            
+            // Refresh open popups
+            if (!document.getElementById('bank_popup').classList.contains('hidden')) {
+                bankc();
             }
-            if (players[i].houses) {
-                players[i].houses.forEach(house => {
-                    const baseHouse = propertyData.houses.find(h => h.name === house.name);
-                    if (baseHouse) {
-                        house.currentSellPrice = baseHouse.currentSellPrice;
-                    }
-                });
+            if (!document.getElementById('property_popup').classList.contains('hidden')) {
+                propertyc();
             }
-        }
+            if (!document.getElementById('stock_popup').classList.contains('hidden')) {
+                stockc();
+            }
+            
+            showNotification(`Age ${currentAge}`);
+        }, 1000); // Match this to animation duration
         
-        // Update all displays
-        updateDisplayedInfo();
-        updateStockPrices();
-        if (!document.getElementById('bank_popup').classList.contains('hidden')) {
-            bankc();
-        }
-        if (!document.getElementById('property_popup').classList.contains('hidden')) {
-            propertyc();
-        }
     } else {
+        showLeaderboard();
         showNotification("Game Over! Maximum age reached!");
     }
 }
@@ -667,4 +743,84 @@ function debugPlayerData() {
             houses: player.houses
         });
     });
+}
+
+function calculateNetWorth(player) {
+    let netWorth = player.total + (player.bankBalance || 0);
+    
+    // Add stock value
+    if (player.stocks) {
+        Object.entries(player.stocks).forEach(([company, shares]) => {
+            const stock = stockData.find(s => s.company === company);
+            if (stock && shares > 0) {
+                netWorth += calculateCurrentPrice(stock) * shares;
+            }
+        });
+    }
+    
+    // Add property values
+    if (player.cars) {
+        player.cars.forEach(car => {
+            netWorth += car.currentSellPrice;
+        });
+    }
+    if (player.houses) {
+        player.houses.forEach(house => {
+            netWorth += house.currentSellPrice;
+        });
+    }
+    
+    return netWorth;
+}
+
+function showLeaderboard() {
+    const leaderboardPopup = document.getElementById('leaderboard-popup');
+    const leaderboardList = document.getElementById('leaderboard-list');
+    leaderboardList.innerHTML = '';
+    
+    // Calculate net worth and sort players
+    const playerRankings = players
+        .slice(0, activePlayerCount)
+        .map((player, index) => ({
+            player,
+            index: index + 1,
+            netWorth: calculateNetWorth(player)
+        }))
+        .sort((a, b) => b.netWorth - a.netWorth);
+    
+    // Create leaderboard rows
+    playerRankings.forEach((entry, rank) => {
+        const row = document.createElement('div');
+        row.className = 'leaderboard-row';
+        
+        // Format assets details
+        const stocksValue = entry.player.stocks ? 
+            Object.entries(entry.player.stocks)
+                .map(([company, shares]) => {
+                    const stock = stockData.find(s => s.company === company);
+                    return shares > 0 ? `${shares} ${company}` : null;
+                })
+                .filter(Boolean)
+                .join(', ') : '';
+        
+        const properties = [
+            ...(entry.player.cars || []).map(car => car.name),
+            ...(entry.player.houses || []).map(house => house.name)
+        ].join(', ');
+        
+        row.innerHTML = `
+            <div class="rank">#${rank + 1}</div>
+            <div class="name">Player ${entry.index}</div>
+            <div class="net-worth">$${entry.netWorth.toLocaleString()}</div>
+            <div class="details">
+                ${properties ? `Properties: ${properties}<br>` : ''}
+                ${stocksValue ? `Stocks: ${stocksValue}<br>` : ''}
+                ${entry.player.bankBalance ? `Bank: $${entry.player.bankBalance.toLocaleString()}` : ''}
+            </div>
+        `;
+        
+        leaderboardList.appendChild(row);
+    });
+    
+    leaderboardPopup.classList.remove('hidden');
 }

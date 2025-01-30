@@ -30,7 +30,7 @@
           <h3>WAGE</h3>
         </div>
         <div class="column">
-          <h3>MONEY</h3>
+          <h3>CASH</h3>
         </div>
         <div class="column">
           <h3>CAR</h3>
@@ -158,16 +158,31 @@
                 <h3>Mitsubishi: $<span id="Mitsubishi-price">270.33</span></h3>
                 <button class="button" onclick="buyStock('Mitsubishi')">Buy</button>
                 <button class="button" onclick="sellStock('Mitsubishi')">Sell</button>
+                <br>
+                <button class="button" onclick="buyStock10('Mitsubishi')">Buy 10</button>
+                <button class="button" onclick="buyStock100('Mitsubishi')">Buy 100</button>
+                <button class="button" onclick="sellStock10('Mitsubishi')">Sell 10</button>
+                <button class="button" onclick="sellStock100('Mitsubishi')">Sell 100</button>
             </div>
             <div class="stock-type">
                 <h3>Amazon: $<span id="Amazon-price">4.4583</span></h3>
                 <button class="button" onclick="buyStock('Amazon')">Buy</button>
                 <button class="button" onclick="sellStock('Amazon')">Sell</button>
+                <br>
+                <button class="button" onclick="buyStock10('Amazon')">Buy 10</button>
+                <button class="button" onclick="buyStock100('Amazon')">Buy 100</button>
+                <button class="button" onclick="sellStock10('Amazon')">Sell 10</button>
+                <button class="button" onclick="sellStock100('Amazon')">Sell 100</button>
             </div>
             <div class="stock-type">
                 <h3>Walmart: $<span id="Walmart-price">14.3483</span></h3>
                 <button class="button" onclick="buyStock('Walmart')">Buy</button>
                 <button class="button" onclick="sellStock('Walmart')">Sell</button>
+                <br>
+                <button class="button" onclick="buyStock10('Walmart')">Buy 10</button>
+                <button class="button" onclick="buyStock100('Walmart')">Buy 100</button>
+                <button class="button" onclick="sellStock10('Walmart')">Sell 10</button>
+                <button class="button" onclick="sellStock100('Walmart')">Sell 100</button>
             </div>
         </div>
         <div class="close_button">
@@ -196,6 +211,32 @@
     <div class="notification-content">
         <p id="notification-message"></p>
         <button class="button" onclick="closeNotification()">OK</button>
+    </div>
+</div>
+
+<!-- Add this after your other popups -->
+<div id="clock-overlay" class="clock-overlay hidden">
+  <div class="clock">
+      <div class="clock-hand"></div>
+  </div>
+</div>
+
+<!-- Add this after your other popups -->
+<div id="leaderboard-popup" class="popup hidden">
+    <div class="popup-content">
+        <h2>Game Over - Final Results</h2>
+        <div class="leaderboard">
+            <div class="leaderboard-header">
+                <div class="rank">Rank</div>
+                <div class="name">Player</div>
+                <div class="net-worth">Net Worth</div>
+                <div class="details">Properties</div>
+            </div>
+            <div id="leaderboard-list">
+                <!-- Players will be inserted here -->
+            </div>
+        </div>
+        <button class="close-button" onclick="closePopup('leaderboard-popup')">Close</button>
     </div>
 </div>
   <script src="./script.js"></script>
