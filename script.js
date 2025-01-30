@@ -324,6 +324,14 @@ function deposit() {
     bankc();
     showNotification(`Successfully deposited $${amount.toLocaleString()}`);
 }
+function depositAll() {
+    const amount = selectedPlayer.total;
+    selectedPlayer.total = 0;
+    selectedPlayer.bankBalance += amount;
+    updateDisplayedInfo();
+    bankc();
+    showNotification(`Successfully deposited $${amount.toLocaleString()}`);
+}
 
 function withdraw() {
     const amount = parseInt(prompt(`How much would you like to withdraw?\nBank Balance: $${selectedPlayer.bankBalance.toLocaleString()}`));
@@ -342,6 +350,15 @@ function withdraw() {
     selectedPlayer.total += amount;
     
     // Update displays
+    updateDisplayedInfo();
+    bankc();
+    showNotification(`Successfully withdrew $${amount.toLocaleString()}`);
+}
+
+function withdrawAll() {
+    const amount = selectedPlayer.bankBalance;
+    selectedPlayer.bankBalance = 0;
+    selectedPlayer.total += amount;
     updateDisplayedInfo();
     bankc();
     showNotification(`Successfully withdrew $${amount.toLocaleString()}`);
@@ -479,12 +496,22 @@ function sellStock100(stock) {
 // Loan functions
 function updateLoanInfo() {
     const loanAmount = selectedPlayer.loan || 0;
-    document.getElementById('current-loan').textContent = loanAmount;
+    if (loanAmount >= selectedPlayer.total * 0.5) {
+        document.getElementById('current-loan').textContent = loanAmount;
+        document.getElementById('have-loan').textContent = "Loan have to pay before next loan: $" + selectedPlayer.total * 0.5;
+    } else if (loanAmount > 0) {
+        document.getElementById('current-loan').textContent = loanAmount;
+        document.getElementById('have-loan').textContent = "You can have another loan";
+    } else {
+        document.getElementById('current-loan').textContent = 0;
+        document.getElementById('have-loan').textContent = "You don't have any loan";
+    }
 }
 
 function takeLoan() {
-    const amount = parseInt(prompt("Enter loan amount:"));
-    if (amount && amount > 0) {
+    const amount = parseInt(prompt(`Enter loan amount(max ${selectedPlayer.wage * 2}):`));
+    const loanAmount = selectedPlayer.loan || 0;
+    if (amount && amount > 0 && amount <= selectedPlayer.wage * 2 && loanAmount + amount <= selectedPlayer.wage * 2 && loanAmount < selectedPlayer.total * 0.5) {
         selectedPlayer.loan = (selectedPlayer.loan || 0) + amount;
         selectedPlayer.total += amount;
         updateDisplayedInfo();
@@ -521,7 +548,7 @@ function closePopup(popupId) {
 }
 
 // Add age tracking
-let currentAge = 79;
+let currentAge = 20;
 
 function nextRound() {
     if (currentAge < 80) {

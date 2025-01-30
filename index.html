@@ -141,6 +141,8 @@
         <div class="banking_options">
             <button class="button" onclick="deposit()">Deposit</button>
             <button class="button" onclick="withdraw()">Withdraw</button>
+            <button class="button" onclick="depositAll()">Deposit All</button>
+            <button class="button" onclick="withdrawAll()">Withdraw All</button>
         </div>
         <div class="close_button">
             <button onclick="closePopup('bank_popup')">×</button>
@@ -196,6 +198,7 @@
     <div class="pop_container">
         <h2>Loan Center</h2>
         <p>Current Loan: $<span id="current-loan">0</span></p>
+        <p id="have-loan">You don't have any loan</p>
         <div class="loan_options">
             <button class="button" onclick="takeLoan()">Take Loan</button>
             <button class="button" onclick="payLoan()">Pay Loan</button>
