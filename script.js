@@ -592,6 +592,7 @@ function nextRound() {
             
             // Update displays
             updateDisplayedInfo();
+            updateStockPrices();
             
             // Refresh open popups
             if (!document.getElementById('bank_popup').classList.contains('hidden')) {
