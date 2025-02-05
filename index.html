@@ -38,6 +38,9 @@
         <div class="column">
           <h3>HOUSE</h3>
         </div>
+        <div class="column">
+          <h3>BUFF</h3>
+        </div>
       </div>
       
       <!-- Player Rows -->
@@ -49,6 +52,7 @@
           <div class="column money"></div>
           <div class="column car"></div>
           <div class="column house"></div>
+          <div class="column buff"></div>
         </div>
         <!-- Repeat 14 more times -->
       </div>
@@ -91,12 +95,6 @@
       <button class="button" onclick="stockc()">STOCK</button>
       <button class="button" onclick="loansc()">LOANS</button>
     </div>
-
-    <!-- Status -->
-    <div class="status">
-      <p>BUFF: <strong></strong></p>
-      <p>DEBUFF: <strong></strong></p>
-    </div>
   </div>
 
   <!-- Property Popup -->
@@ -136,13 +134,22 @@
   <!-- Bank Popup -->
   <div class="pop_overlay hidden" id="bank_popup">
     <div class="pop_container">
-        <h2>Banking Options</h2>
-        <p>Current Balance: $<span id="popup_balance"></span></p>
-        <div class="banking_options">
-            <button class="button" onclick="deposit()">Deposit</button>
-            <button class="button" onclick="withdraw()">Withdraw</button>
-            <button class="button" onclick="depositAll()">Deposit All</button>
-            <button class="button" onclick="withdrawAll()">Withdraw All</button>
+        <h2>Bank</h2>
+        <p>Cash: $<span id="popup_balance"></span></p>
+        <p>Bank Balance: $<span id="popup_bank_balance"></span></p>
+        <div class="dropdown">
+            <button class="button dropbtn" onclick="toggleDropdown('deposit-dropdown')">Deposit</button>
+            <div id="deposit-dropdown" class="dropdown-content">
+                <a href="#" onclick="deposit()">Specific Amount</a>
+                <a href="#" onclick="depositAll()">All</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="button dropbtn" onclick="toggleDropdown('withdraw-dropdown')">Withdraw</button>
+            <div id="withdraw-dropdown" class="dropdown-content">
+                <a href="#" onclick="withdraw()">Specific Amount</a>
+                <a href="#" onclick="withdrawAll()">All</a>
+            </div>
         </div>
         <div class="close_button">
             <button onclick="closePopup('bank_popup')">×</button>
@@ -158,33 +165,54 @@
         <div class="stock_options">
             <div class="stock-type">
                 <h3>Mitsubishi: $<span id="Mitsubishi-price">270.33</span></h3>
-                <button class="button" onclick="buyStock('Mitsubishi')">Buy</button>
-                <button class="button" onclick="sellStock('Mitsubishi')">Sell</button>
-                <br>
-                <button class="button" onclick="buyStock10('Mitsubishi')">Buy 10</button>
-                <button class="button" onclick="buyStock100('Mitsubishi')">Buy 100</button>
-                <button class="button" onclick="sellStock10('Mitsubishi')">Sell 10</button>
-                <button class="button" onclick="sellStock100('Mitsubishi')">Sell 100</button>
+                <div class="dropdown">
+                    <button class="button dropbtn" onclick="toggleDropdown('Mitsubishi-buy-dropdown')">Buy</button>
+                    <div id="Mitsubishi-buy-dropdown" class="dropdown-content">
+                        <a href="#" onclick="openBuyStockPopup('Mitsubishi')">Custom Amount</a>
+                        <a href="#" onclick="buyStockTen('Mitsubishi')">Buy 10</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="button dropbtn" onclick="toggleDropdown('Mitsubishi-sell-dropdown')">Sell</button>
+                    <div id="Mitsubishi-sell-dropdown" class="dropdown-content">
+                        <a href="#" onclick="sellStock('Mitsubishi')">Custom Amount</a>
+                        <a href="#" onclick="sellStockMax('Mitsubishi')">Sell All</a>
+                    </div>
+                </div>
             </div>
             <div class="stock-type">
                 <h3>Amazon: $<span id="Amazon-price">4.4583</span></h3>
-                <button class="button" onclick="buyStock('Amazon')">Buy</button>
-                <button class="button" onclick="sellStock('Amazon')">Sell</button>
-                <br>
-                <button class="button" onclick="buyStock10('Amazon')">Buy 10</button>
-                <button class="button" onclick="buyStock100('Amazon')">Buy 100</button>
-                <button class="button" onclick="sellStock10('Amazon')">Sell 10</button>
-                <button class="button" onclick="sellStock100('Amazon')">Sell 100</button>
+                <div class="dropdown">
+                    <button class="button dropbtn" onclick="toggleDropdown('Amazon-buy-dropdown')">Buy</button>
+                    <div id="Amazon-buy-dropdown" class="dropdown-content">
+                        <a href="#" onclick="openBuyStockPopup('Amazon')">Custom Amount</a>
+                        <a href="#" onclick="buyStockTen('Amazon')">Buy 10</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="button dropbtn" onclick="toggleDropdown('Amazon-sell-dropdown')">Sell</button>
+                    <div id="Amazon-sell-dropdown" class="dropdown-content">
+                        <a href="#" onclick="sellStock('Amazon')">Custom Amount</a>
+                        <a href="#" onclick="sellStockMax('Amazon')">Sell All</a>
+                    </div>
+                </div>
             </div>
             <div class="stock-type">
                 <h3>Walmart: $<span id="Walmart-price">14.3483</span></h3>
-                <button class="button" onclick="buyStock('Walmart')">Buy</button>
-                <button class="button" onclick="sellStock('Walmart')">Sell</button>
-                <br>
-                <button class="button" onclick="buyStock10('Walmart')">Buy 10</button>
-                <button class="button" onclick="buyStock100('Walmart')">Buy 100</button>
-                <button class="button" onclick="sellStock10('Walmart')">Sell 10</button>
-                <button class="button" onclick="sellStock100('Walmart')">Sell 100</button>
+                <div class="dropdown">
+                    <button class="button dropbtn" onclick="toggleDropdown('Walmart-buy-dropdown')">Buy</button>
+                    <div id="Walmart-buy-dropdown" class="dropdown-content">
+                        <a href="#" onclick="openBuyStockPopup('Walmart')">Custom Amount</a>
+                        <a href="#" onclick="buyStockTen('Walmart')">Buy 10</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="button dropbtn" onclick="toggleDropdown('Walmart-sell-dropdown')">Sell</button>
+                    <div id="Walmart-sell-dropdown" class="dropdown-content">
+                        <a href="#" onclick="sellStock('Walmart')">Custom Amount</a>
+                        <a href="#" onclick="sellStockMax('Walmart')">Sell All</a>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="close_button">

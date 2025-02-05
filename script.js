@@ -21,13 +21,14 @@ let propertyData = {
 };
 
 class player {
-    constructor(job, wage, total, cars = [], houses = []) {
+    constructor(job, wage, total, cars = [], houses = [], buff = []) {
         this.job = job;
         this.wage = parseInt(wage);
         this.total = parseInt(total);
         this.bankBalance = 0;
         this.cars = Array.isArray(cars) ? cars : [];
         this.houses = Array.isArray(houses) ? houses : [];
+        this.buff = Array.isArray(buff) ? buff : [];
     }
 }
 
@@ -50,7 +51,8 @@ async function loadGameData() {
                 randomJob.wage,
                 randomJob.total,
                 [],  // empty cars array
-                []   // empty houses array
+                [],   // empty houses array
+                []   // empty buff array
             ));
         }
         
@@ -86,6 +88,7 @@ function initializeGame() {
             <div class="column money">$${players[i].total}</div>
             <div class="column cars">Cars: ${players[i].cars.length}</div>
             <div class="column houses">Houses: ${players[i].houses.length}</div>
+            <div class="column buff">Buff: ${players[i].buff.length}</div>
         `;
         playerRowsContainer.appendChild(row);
     }
@@ -153,6 +156,12 @@ function updateDisplayedInfo() {
                 player.houses.map(house => house.name).join(', ') : 
                 'No houses';
             row.querySelector('.houses').textContent = housesText;
+
+            // Update buff display
+            const buffText = player.buff && player.buff.length > 0 ? 
+                player.buff.map(buff => buff.name).join(', ') : 
+                'No buffs';
+            row.querySelector('.buff').textContent = buffText;
             
             row.classList.remove('hidden');
         } else {
@@ -303,6 +312,30 @@ function bankc() {
     document.getElementById('popup_bank_balance').textContent = (selectedPlayer.bankBalance || 0).toLocaleString();
 }
 
+function toggleDropdown(dropdownId) {
+    const dropdowns = document.getElementsByClassName("dropdown-content");
+    // Close all other dropdowns
+    for (let dropdown of dropdowns) {
+        if (dropdown.id !== dropdownId) {
+            dropdown.classList.remove('show');
+        }
+    }
+    // Toggle the selected dropdown
+    document.getElementById(dropdownId).classList.toggle("show");
+}
+
+// Close dropdowns when clicking outside
+window.onclick = function(event) {
+    if (!event.target.matches('.dropbtn')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let dropdown of dropdowns) {
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        }
+    }
+}
+
 function deposit() {
     const amount = parseInt(prompt(`How much would you like to deposit?\nCurrent Balance: $${selectedPlayer.total.toLocaleString()}`));
     
@@ -324,6 +357,7 @@ function deposit() {
     bankc();
     showNotification(`Successfully deposited $${amount.toLocaleString()}`);
 }
+
 function depositAll() {
     const amount = selectedPlayer.total;
     selectedPlayer.total = 0;
@@ -396,43 +430,19 @@ function updateStockPrices() {
     });
 }
 
-function buyStock(stock) {
-    const amount = parseInt(prompt(`How many ${stock} stocks to buy?`));
-    const total = amount * stockPrices[stock];
-    
-    if (amount && amount > 0 && total <= selectedPlayer.total) {
-        selectedPlayer.total -= total;
-        selectedPlayer[`${stock}Stocks`] = (selectedPlayer[`${stock}Stocks`] || 0) + amount;
-        updateDisplayedInfo();
-        closePopup('stock_popup');
-    } else {
-        showNotification("Invalid amount or insufficient funds!");
-    }
-}
-
-function buyStock10(stock) {
-    const amount = 10;
-    const total = amount * stockPrices[stock];
-    if (amount && amount > 0 && total <= selectedPlayer.total) {
-        selectedPlayer.total -= total;
-        selectedPlayer[`${stock}Stocks`] = (selectedPlayer[`${stock}Stocks`] || 0) + amount;
-        updateDisplayedInfo();
-        closePopup('stock_popup');
-    } else {
-        showNotification("Invalid amount or insufficient funds!");
-    }
-}
-
-function buyStock100(stock) {
-    const amount = 100;
-    const total = amount * stockPrices[stock];
-    if (amount && amount > 0 && total <= selectedPlayer.total) {
-        selectedPlayer.total -= total;
-        selectedPlayer[`${stock}Stocks`] = (selectedPlayer[`${stock}Stocks`] || 0) + amount;
-        updateDisplayedInfo();
-        closePopup('stock_popup');
-    } else {
-        showNotification("Invalid amount or insufficient funds!");
+function openBuyStockPopup(stock) {
+    const amount = parseInt(prompt(`How many shares of ${stock} would you like to buy?\nCurrent Price: $${stockPrices[stock]}`));
+    if (amount && amount > 0) {
+        const total = amount * stockPrices[stock];
+        if (total <= selectedPlayer.total) {
+            selectedPlayer.total -= total;
+            selectedPlayer[`${stock}Stocks`] = (selectedPlayer[`${stock}Stocks`] || 0) + amount;
+            updateDisplayedInfo();
+            showNotification(`Successfully bought ${amount} shares of ${stock}!`);
+        } else {
+            showNotification("Insufficient funds!");
+        }
+        popupStockBalance.textContent = selectedPlayer.total;
     }
 }
 
@@ -443,54 +453,46 @@ function sellStock(stock) {
         return;
     }
     
-    const amount = parseInt(prompt(`How many ${stock} stocks to sell? (You have ${maxAmount})`));
+    const amount = parseInt(prompt(`How many shares of ${stock} would you like to sell? (You have ${maxAmount})`));
     if (amount && amount > 0 && amount <= maxAmount) {
         const total = amount * stockPrices[stock];
         selectedPlayer.total += total;
         selectedPlayer[`${stock}Stocks`] -= amount;
         updateDisplayedInfo();
-        closePopup('stock_popup');
+        showNotification(`Successfully sold ${amount} shares of ${stock}!`);
     } else {
         showNotification("Invalid amount!");
     }
+    popupStockBalance.textContent = selectedPlayer.total;
 }
 
-function sellStock10(stock) {
-    const maxAmount = selectedPlayer[`${stock}Stocks`] || 0;
-    if (maxAmount === 0) {
-        showNotification("No stocks to sell!");
-        return;
-    }
-    
+function buyStockTen(stock) {
     const amount = 10;
-    if (amount && amount > 0 && amount <= maxAmount) {
-        const total = amount * stockPrices[stock];
-        selectedPlayer.total += total;
-        selectedPlayer[`${stock}Stocks`] -= amount;
+    const total = amount * stockPrices[stock];
+    
+    if (total <= selectedPlayer.total) {
+        selectedPlayer.total -= total;
+        selectedPlayer[`${stock}Stocks`] = (selectedPlayer[`${stock}Stocks`] || 0) + amount;
         updateDisplayedInfo();
-        closePopup('stock_popup');
+        showNotification(`Successfully bought 10 shares of ${stock}!`);
     } else {
-        showNotification("Invalid amount!");
+        showNotification("Insufficient funds to buy 10 shares!");
     }
+    popupStockBalance.textContent = selectedPlayer.total;
 }
 
-function sellStock100(stock) {
+function sellStockMax(stock) {
     const maxAmount = selectedPlayer[`${stock}Stocks`] || 0;
-    if (maxAmount === 0) {
-        showNotification("No stocks to sell!");
-        return;
-    }
-    
-    const amount = 100;
-    if (amount && amount > 0 && amount <= maxAmount) {
-        const total = amount * stockPrices[stock];
+    if (maxAmount > 0) {
+        const total = maxAmount * stockPrices[stock];
         selectedPlayer.total += total;
-        selectedPlayer[`${stock}Stocks`] -= amount;
+        selectedPlayer[`${stock}Stocks`] = 0;
         updateDisplayedInfo();
-        closePopup('stock_popup');
+        showNotification(`Successfully sold all ${maxAmount} shares of ${stock}!`);
     } else {
-        showNotification("Invalid amount!");
+        showNotification("No stocks to sell!");
     }
+    popupStockBalance.textContent = selectedPlayer.total;
 }
 
 // Loan functions
@@ -590,10 +592,6 @@ function nextRound() {
                 }
             }
             
-            // Update displays
-            updateDisplayedInfo();
-            updateStockPrices();
-            
             // Refresh open popups
             if (!document.getElementById('bank_popup').classList.contains('hidden')) {
                 bankc();
@@ -604,6 +602,26 @@ function nextRound() {
             if (!document.getElementById('stock_popup').classList.contains('hidden')) {
                 stockc();
             }
+
+            // Check for buffs and apply them
+            if (selectedPlayer.buff && selectedPlayer.buff.length > 0) {
+                selectedPlayer.buff.forEach(buff => {
+                    buff.duration--;
+                    if (buff.duration <= 0) {
+                        selectedPlayer.buff = selectedPlayer.buff.filter(b => b !== buff);
+                    }
+                    else {
+                        switch(buff.name) {
+                            case 'Divorce':
+                                selectedPlayer.total = selectedPlayer.total - selectedPlayer.wage * 0.1;
+                                break;
+                        }
+                    }
+                });
+            }
+            // Update displays
+            updateDisplayedInfo();
+            updateStockPrices();
             
             showNotification(`Age ${currentAge}`);
         }, 1000); // Match this to animation duration
@@ -694,6 +712,9 @@ function applyEvent(eventName) {
                     selectedPlayer.stocks[company] = Math.floor(selectedPlayer.stocks[company] / 2);
                 });
             }
+
+            // Lose 10% wage every round
+            selectedPlayer.buff.push({ name: 'Divorce', duration: 10 });
             break;
             
         case 'increase_wage':

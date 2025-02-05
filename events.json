@@ -3,7 +3,7 @@
     {
       "name": "Divorce",
       "effect": "split_money",
-      "description": "Total money is split in half",
+      "description": "Total money is split in half and you lose 10% of your wage every round for 10 rounds",
       "type": "negative"
     },
     {
